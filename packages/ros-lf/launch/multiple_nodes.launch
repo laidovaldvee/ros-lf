@@ -1,6 +1,5 @@
 <launch>
 
-  <node pkg="ros-lf" type="my_publisher_node.py" name="my_publisher_node" output="screen"/>
-  <node pkg="ros-lf" type="my_subscriber_node.py" name="my_subscriber_node"  output="screen"/>
+  <node pkg="ros-lf" type="ros_lf.py" name="linefollow" output="screen"/>
 
 </launch>
