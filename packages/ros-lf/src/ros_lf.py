@@ -15,6 +15,8 @@ from smbus2 import SMBus
 busno = 12 #/dev/i2c-12
 addr = 62 #0x3e
 reg = 17 #0x11
+error_list = [64 , 16 , 4 , 2 , -2 , -4 , -16 , -64]
+Kp = 0.05
 
 bus = SMBus(busno)
 
@@ -196,23 +198,24 @@ class LineFollow(DTROS):
         return cali_file
 
     def to_binary(self,number):
-        count = 0
-        zero = "00000000"
-        binary = bin(number).replace("0b", "")
-        binary = zero[:(8-len(binary))] + binary
+        zero_list = [0,0,0,0,0,0,0,0]
+        binary = bin(int(number)).replace("0b", "")
         for i in binary:
-            if i == "1":
-                count+=1
-        return binary
+            zero_list.append(int(i))
+        binary_list = zero_list[-8:]
+        return binary_list
         
-    def binary_to_speed(self, binary):
-        left_speed = 0.4
-        right_speed = 0.4
+    def binary_to_error(self, binary):
+    	esum_list = np.multiply(error_list,binary)
+	error = sum(esum_list)/np.count_nonzero(esum_list)
+	return error
+    
+    def error_to_speed(self, error):
+        left_speed = 1
+        right_speed = 1
         max_speed = 9
-        speed_step = 2
-        for i in range(4):
-            left_speed = left_speed + int(binary[-1-i])*(max_speed-pow(speed_step,i))
-            right_speed = right_speed + int(binary[i])*(max_speed-pow(speed_step,i))
+        left_speed = left_speed - Kp*error
+        right_speed = right_speed + Kp*error
         return left_speed, right_speed
         
         
@@ -276,7 +279,7 @@ class LineFollow(DTROS):
             
             # Put the wheel commands in a message and publish
             speed.header.stamp = speed.header.stamp
-            l, r = self.binary_to_speed(self.to_binary(b))
+            l, r = self.error_to_speed(self.binary_to_error(self.to_binary(b)))
             rospy.loginfo(l)
             rospy.loginfo(r)
             speed_l, speed_r = self.speedToCmd(l,r)
