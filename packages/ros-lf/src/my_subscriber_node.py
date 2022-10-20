@@ -3,7 +3,7 @@
 import os
 import rospy
 from duckietown.dtros import DTROS, NodeType
-from std_msgs.msg import int8
+from std_msgs.msg import Float32
 
 class MySubscriberNode(DTROS):
 
@@ -11,7 +11,7 @@ class MySubscriberNode(DTROS):
         # initialize the DTROS parent class
         super(MySubscriberNode, self).__init__(node_name=node_name, node_type=NodeType.GENERIC)
         # construct publisher
-        self.sub = rospy.Subscriber('line_array', int8, self.callback)
+        self.sub = rospy.Subscriber('line_array', Float32, self.callback)
 
     def callback(self, data):
         rospy.loginfo("I heard %s", data.data)

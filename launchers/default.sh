@@ -13,12 +13,12 @@ dt-launchfile-init
 # NOTE: Use `dt-exec COMMAND` to run the main process (blocking process)
 
 # launching app
-roscore &
-sleep 5
+#roscore &
+#sleep 5
 dt-exec rosrun ros-lf Line_array_publisher_node.py
-#dt-exec rosrun ros-lf my_subscriber_node.py
+dt-exec rosrun ros-lf ros_lf.py
 
-dt-exec roslaunch ros-lf multiple_nodes.launch
+#dt-exec roslaunch ros-lf multiple_nodes.launch
 
 # ----------------------------------------------------------------------------
 # YOUR CODE ABOVE THIS LINE

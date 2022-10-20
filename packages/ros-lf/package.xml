@@ -2,7 +2,7 @@
   <name>ros-lf</name>
   <version>0.1.0</version>
   <description>
-  This package is a test for RH3.
+  This package is a LineFollower array test.
   </description>
   <maintainer email="laidovaldvee@gmail.com">Laido Valdvee</maintainer>
   <license>None</license>

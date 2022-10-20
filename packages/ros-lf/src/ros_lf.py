@@ -9,16 +9,14 @@ import math
 
 from duckietown.dtros import DTROS, NodeType, TopicType, DTParam, ParamType
 #from sensor_msgs.msg import CompressedImage
+from std_msgs.msg import Float32
 from duckietown_msgs.msg import WheelsCmdStamped
-from smbus2 import SMBus
 
-busno = 12 #/dev/i2c-12
-addr = 62 #0x3e
-reg = 17 #0x11
-error_list = [64 , 16 , 4 , 2 , -2 , -4 , -16 , -64]
+
+
 Kp = 0.05
 
-bus = SMBus(busno)
+
 
 
 class LineFollow(DTROS):
@@ -70,6 +68,9 @@ class LineFollow(DTROS):
         self._baseline = rospy.get_param('~baseline')
         self._radius = rospy.get_param('~radius')
         self._k = rospy.get_param('~k')
+
+        self.error = 0.0
+
         # Get editable parameters
         self._gain = DTParam(
             '~gain',
@@ -96,9 +97,14 @@ class LineFollow(DTROS):
         #rospy.set_param('/%s/camera_node/exposure_mode'
         #                self.veh_name, 'off')
         
+        self.sub = rospy.Subscriber('line_array', Float32, self.callback)
+        
         self.pub = rospy.Publisher('/'+self.veh_name+'/wheels_driver_node/wheels_cmd', WheelsCmdStamped, queue_size=0)
 
         self.log("Initialized")
+        
+    def callback(self, data):
+    	self.error=data.data
 
     def speedToCmd(self, speed_l, speed_r):
         """Applies the robot-specific gain and trim to the
@@ -196,19 +202,6 @@ class LineFollow(DTROS):
         cali_file_folder = '/data/config/calibrations/kinematics/'
         cali_file = cali_file_folder + name + ".yaml"
         return cali_file
-
-    def to_binary(self,number):
-        zero_list = [0,0,0,0,0,0,0,0]
-        binary = bin(int(number)).replace("0b", "")
-        for i in binary:
-            zero_list.append(int(i))
-        binary_list = zero_list[-8:]
-        return binary_list
-        
-    def binary_to_error(self, binary):
-    	esum_list = np.multiply(error_list,binary)
-	error = sum(esum_list)/np.count_nonzero(esum_list)
-	return error
     
     def error_to_speed(self, error):
         left_speed = 1
@@ -257,29 +250,10 @@ class LineFollow(DTROS):
         last_average = 0
         rate = rospy.Rate(10) # 10Hz
         while not rospy.is_shutdown():
-            b = bus.read_byte_data(addr,reg)
-            #bin_no = self.to_binary(b)
-            #if density > 0 and int(bin_no,2) != 0:
-            #	average = math.log2(int(bin_no,2))/density
-            #else:
-            #    average = -1
-            #rospy.loginfo(average)
-            rospy.loginfo(self.to_binary(b))
-            #rospy.loginfo(density)
-            
-            #if average < 0:
-            #    speed_l, speed_r = self.looking_line(last_average)
-            #elif average >=4: 
-            #    speed_l, speed_r = self.speedToCmd(0.5,3)
-            #elif average <= 3:
-            #    speed_l, speed_r = self.speedToCmd(3,0.5)
-            #else:
-            #    speed_l, speed_r = self.speedToCmd(3,3)
-            #last_average = average
-            
+                        
             # Put the wheel commands in a message and publish
             speed.header.stamp = speed.header.stamp
-            l, r = self.error_to_speed(self.binary_to_error(self.to_binary(b)))
+            l, r = self.error_to_speed(self.error)
             rospy.loginfo(l)
             rospy.loginfo(r)
             speed_l, speed_r = self.speedToCmd(l,r)
