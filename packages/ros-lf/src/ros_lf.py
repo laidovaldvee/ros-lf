@@ -14,8 +14,8 @@ from duckietown_msgs.msg import WheelsCmdStamped
 
 
 
-Kp = 0.05
-
+Kp = -2
+Speed = 4
 
 
 
@@ -88,7 +88,7 @@ class LineFollow(DTROS):
             '~limit',
             param_type=ParamType.FLOAT,
             min_value=0.0,
-            max_value=1.0
+            max_value=9.0
         )
 
         # Wait for the automatic gain control
@@ -204,8 +204,8 @@ class LineFollow(DTROS):
         return cali_file
     
     def error_to_speed(self, error):
-        left_speed = 1
-        right_speed = 1
+        left_speed = Speed
+        right_speed = Speed
         max_speed = 9
         left_speed = left_speed - Kp*error
         right_speed = right_speed + Kp*error
@@ -248,7 +248,7 @@ class LineFollow(DTROS):
         # publish message every 1 second
         speed = WheelsCmdStamped()
         last_average = 0
-        rate = rospy.Rate(10) # 10Hz
+        rate = rospy.Rate(20) # 10Hz
         while not rospy.is_shutdown():
                         
             # Put the wheel commands in a message and publish

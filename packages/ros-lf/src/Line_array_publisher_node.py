@@ -13,7 +13,7 @@ busno = 12 #/dev/i2c-12
 addr = 62 #0x3e
 reg = 17 #0x11
 
-error_list = [64 , 16 , 4 , 2 , -2 , -4 , -16 , -64]
+error_list = [32 , 16 , 8 , 2 , -2 , -8 , -16 , -32]
 bus = SMBus(busno)
 
 class MyPublisherNode(DTROS):
@@ -26,7 +26,7 @@ class MyPublisherNode(DTROS):
 
     def run(self):
         # publish message every 1 second
-        rate = rospy.Rate(10) # 10Hz
+        rate = rospy.Rate(20) # 10Hz
         while not rospy.is_shutdown():
             b = bus.read_byte_data(addr,reg)
             message = self.binary_to_error(self.to_binary(b))
