@@ -14,7 +14,7 @@ from duckietown_msgs.msg import WheelsCmdStamped
 
 
 
-Kp = -2
+Kp = 0.4
 Speed = 4
 
 
@@ -98,6 +98,8 @@ class LineFollow(DTROS):
         #                self.veh_name, 'off')
         
         self.sub = rospy.Subscriber('line_array', Float32, self.callback)
+
+        self.tof_sub = rospy.Subscriber('range', Float32, self.range_callback)
         
         self.pub = rospy.Publisher('/'+self.veh_name+'/wheels_driver_node/wheels_cmd', WheelsCmdStamped, queue_size=0)
 
@@ -105,6 +107,9 @@ class LineFollow(DTROS):
         
     def callback(self, data):
     	self.error=data.data
+
+    def range_callback(self,data):
+        self.range = data.range
 
     def speedToCmd(self, speed_l, speed_r):
         """Applies the robot-specific gain and trim to the
@@ -206,7 +211,7 @@ class LineFollow(DTROS):
     def error_to_speed(self, error):
         left_speed = Speed
         right_speed = Speed
-        max_speed = 9
+        max_speed = 4
         left_speed = left_speed - Kp*error
         right_speed = right_speed + Kp*error
         return left_speed, right_speed
