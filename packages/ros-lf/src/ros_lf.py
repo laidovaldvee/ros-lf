@@ -8,7 +8,7 @@ import yaml
 import math
 
 from duckietown.dtros import DTROS, NodeType, TopicType, DTParam, ParamType
-#from sensor_msgs.msg import CompressedImage
+from sensor_msgs.msg import Range
 from std_msgs.msg import Float32
 from duckietown_msgs.msg import WheelsCmdStamped
 
@@ -68,8 +68,10 @@ class LineFollow(DTROS):
         self._baseline = rospy.get_param('~baseline')
         self._radius = rospy.get_param('~radius')
         self._k = rospy.get_param('~k')
+        self.distance = 0.09
 
         self.error = 0.0
+        self.range = 0.0
 
         # Get editable parameters
         self._gain = DTParam(
@@ -97,18 +99,18 @@ class LineFollow(DTROS):
         #rospy.set_param('/%s/camera_node/exposure_mode'
         #                self.veh_name, 'off')
         
-        self.sub = rospy.Subscriber('line_array', Float32, self.callback)
+        self.sub = rospy.Subscriber('line_array', Float32, self.lf_callback)
 
-        self.tof_sub = rospy.Subscriber('range', Float32, self.range_callback)
+        self.tof_sub = rospy.Subscriber('/'+self.veh_name+'/front_center_tof_driver_node/range', Range, self.range_callback)
         
         self.pub = rospy.Publisher('/'+self.veh_name+'/wheels_driver_node/wheels_cmd', WheelsCmdStamped, queue_size=0)
 
         self.log("Initialized")
         
-    def callback(self, data):
-    	self.error=data.data
+    def lf_callback(self, data):
+        self.error=data.data
 
-    def range_callback(self,data):
+    def range_callback(self, data):
         self.range = data.range
 
     def speedToCmd(self, speed_l, speed_r):
@@ -255,18 +257,23 @@ class LineFollow(DTROS):
         last_average = 0
         rate = rospy.Rate(20) # 10Hz
         while not rospy.is_shutdown():
-                        
-            # Put the wheel commands in a message and publish
-            speed.header.stamp = speed.header.stamp
-            l, r = self.error_to_speed(self.error)
-            rospy.loginfo(l)
-            rospy.loginfo(r)
-            speed_l, speed_r = self.speedToCmd(l,r)
-            speed.vel_left = speed_l
-            speed.vel_right = speed_r
-            self.pub.publish(speed)
-            rate.sleep()
-
+            if self.range > self.distance or self.range<0.05:           
+                # Put the wheel commands in a message and publish
+                speed.header.stamp = speed.header.stamp
+                l, r = self.error_to_speed(self.error)
+                rospy.loginfo(l)
+                rospy.loginfo(r)
+                speed_l, speed_r = self.speedToCmd(l,r)
+                speed.vel_left = speed_l
+                speed.vel_right = speed_r
+                self.pub.publish(speed)
+                rate.sleep()
+            else:
+                speed.header.stamp = speed.header.stamp
+                speed.vel_left = 0
+                speed.vel_right = 0
+                self.pub.publish(speed)
+                
     def looking_line(self,avg):
         if avg > 4:
             return self.speedToCmd(0.5,2)
