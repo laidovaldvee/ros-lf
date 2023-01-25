@@ -10,7 +10,8 @@ import math
 from duckietown.dtros import DTROS, NodeType, TopicType, DTParam, ParamType
 from sensor_msgs.msg import Range
 from std_msgs.msg import Float32
-from duckietown_msgs.msg import WheelsCmdStamped
+from duckietown_msgs.msg import WheelsCmdStamped, WheelEncoderStamped
+import odometry_activity as odom
 
 
 
@@ -71,6 +72,8 @@ class LineFollow(DTROS):
         self.distance = 0.09
 
         self.error = 0.0
+        self.l_ticks = 0
+        self.r_ticks = 0
         self.range = 0.0
 
         # Get editable parameters
@@ -102,6 +105,9 @@ class LineFollow(DTROS):
         self.sub = rospy.Subscriber('line_array', Float32, self.lf_callback)
 
         self.tof_sub = rospy.Subscriber('/'+self.veh_name+'/front_center_tof_driver_node/range', Range, self.range_callback)
+
+        self.left_encoder_sub = rospy.Subscriber('/'+self.veh_name+'/left_wheel_encoder_node/tick', Range, self.left_tick_callback)
+        self.right_encoder_sub = rospy.Subscriber('/'+self.veh_name+'/right_wheel_encoder_node/tick', Range, self.right_tick_callback)
         
         self.pub = rospy.Publisher('/'+self.veh_name+'/wheels_driver_node/wheels_cmd', WheelsCmdStamped, queue_size=0)
 
@@ -112,6 +118,12 @@ class LineFollow(DTROS):
 
     def range_callback(self, data):
         self.range = data.range
+
+    def left_tick_callback(self,data):
+        self.l_ticks = data.data
+    
+    def right_tick_callback(self,data):
+        self.r_ticks = data.data
 
     def speedToCmd(self, speed_l, speed_r):
         """Applies the robot-specific gain and trim to the
