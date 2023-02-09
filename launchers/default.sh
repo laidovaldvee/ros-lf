@@ -17,7 +17,7 @@ dt-launchfile-init
 #sleep 5
 dt-exec rosrun ros-lf Line_array_publisher_node.py
 dt-exec rosrun ros-lf ros_lf.py
-
+dt-exec roslaunch mpu_6050_driver imu.launch 
 #dt-exec roslaunch ros-lf multiple_nodes.launch
 
 # ----------------------------------------------------------------------------

@@ -7,7 +7,7 @@ R = 0.0318 # insert value measured by ruler, in *meters*
 baseline_wheel2wheel = 0.1
 
 
-def delta_phi(encoder_msg, prev_ticks):
+def delta_phim(encoder_msg, prev_ticks):
     """
         Args:
             encoder_msg: ROS encoder message (ENUM)
@@ -51,7 +51,7 @@ def pose_estimation( R, # radius of wheel (assumed identical) - this is fixed in
             x_curr, y_curr, theta_curr (:double: values)
     """
     d_A = (delta_phi_right*R+delta_phi_left*R)/2 # robot distance travelled in robot frame [meters]
-    Delta_Theta = (delta_phi_right*R-delta_phi_left*R)/2*baseline_wheel2wheel # [radians]
+    Delta_Theta = (delta_phi_right*R-delta_phi_left*R)/baseline_wheel2wheel # [radians]
     Delta_x = d_A*np.cos(theta_prev)
     Delta_y = d_A*np.sin(theta_prev)
 

@@ -102,7 +102,7 @@ class LineFollow(DTROS):
         #rospy.set_param('/%s/camera_node/exposure_mode'
         #                self.veh_name, 'off')
         
-        self.sub = rospy.Subscriber('line_array', Float32, self.lf_callback)
+        self.sub = rospy.Subscriber('/'+self.veh_name+'/line_array', Float32, self.lf_callback)
 
         self.tof_sub = rospy.Subscriber('/'+self.veh_name+'/front_center_tof_driver_node/range', Range, self.range_callback)
 

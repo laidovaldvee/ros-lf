@@ -1,0 +1,11 @@
+<package>
+  <name>mpu_6050_driver</name>
+  <version>0.1.0</version>
+  <description>
+  MPU-6050 driver
+  </description>
+  <maintainer email="laidovaldvee@gmail.com">Laido Valdvee</maintainer>
+  <license>None</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+</package>

@@ -22,7 +22,8 @@ class MyPublisherNode(DTROS):
         # initialize the DTROS parent class
         super(MyPublisherNode, self).__init__(node_name=node_name, node_type=NodeType.GENERIC)
         # construct publisher
-        self.pub = rospy.Publisher('line_array', Float32, queue_size=10)
+        self.veh_name = os.environ['VEHICLE_NAME']
+        self.pub = rospy.Publisher('/'+self.veh_name+'/line_array', Float32, queue_size=10)
 
     def run(self):
         # publish message every 1 second
