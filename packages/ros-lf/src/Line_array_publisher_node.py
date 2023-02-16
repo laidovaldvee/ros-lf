@@ -13,7 +13,7 @@ busno = 12 #/dev/i2c-12
 addr = 62 #0x3e
 reg = 17 #0x11
 
-error_list = [32 , 16 , 8 , 2 , -2 , -8 , -16 , -32]
+error_list = [14 , 10 , 6 , 2 , -2 , -6 , -10 , -14]
 bus = SMBus(busno)
 
 class MyPublisherNode(DTROS):
@@ -37,7 +37,7 @@ class MyPublisherNode(DTROS):
             
     def to_binary(self,number):
         zero_list = [0,0,0,0,0,0,0,0]
-        binary = bin(int(number)).replace("0b", "")
+        binary = bin(int(number))[2:]
         for i in binary:
             zero_list.append(int(i))
         binary_list = zero_list[-8:]

@@ -6,6 +6,7 @@ import os
 import rospy
 import yaml
 import math
+import time
 
 from duckietown.dtros import DTROS, NodeType, TopicType, DTParam, ParamType
 from sensor_msgs.msg import Range
@@ -13,10 +14,13 @@ from std_msgs.msg import Float32
 from duckietown_msgs.msg import WheelsCmdStamped, WheelEncoderStamped
 import odometry_activity as odom
 
-
-
-Kp = 0.4
-Speed = 4
+Kp = rospy.set_param("/p",0.2)
+Ki = rospy.set_param("/i",0.0)
+Kd = rospy.set_param("/d",0.0)
+#Kp = 0.3
+#Ki = 0.0
+#Kd = 0.2
+Speed = 3
 
 
 
@@ -69,9 +73,12 @@ class LineFollow(DTROS):
         self._baseline = rospy.get_param('~baseline')
         self._radius = rospy.get_param('~radius')
         self._k = rospy.get_param('~k')
-        self.distance = 0.09
-
+        self.distance = 0.13
+        self.time = time.time()
+        self.last_time = self.time
+        self.I = 0.0
         self.error = 0.0
+        self.last_error = self.error
         self.l_ticks = 0
         self.r_ticks = 0
         self.range = 0.0
@@ -115,6 +122,7 @@ class LineFollow(DTROS):
         
     def lf_callback(self, data):
         self.error=data.data
+        self.time=time.time()
 
     def range_callback(self, data):
         self.range = data.range
@@ -222,12 +230,21 @@ class LineFollow(DTROS):
         cali_file = cali_file_folder + name + ".yaml"
         return cali_file
     
-    def error_to_speed(self, error):
+    def error_to_speed(self, error,last_error,time,last_time):
+        Kp = rospy.get_param("/p")
+        Ki = rospy.get_param("/i")
+        Kd = rospy.get_param("/d")
         left_speed = Speed
         right_speed = Speed
-        max_speed = 4
-        left_speed = left_speed - Kp*error
-        right_speed = right_speed + Kp*error
+        #max_speed = 4
+        delta_time=time-last_time
+        P = Kp*error
+        self.I = self.I+Ki*error*delta_time
+        D = Kd*(error-last_error)/delta_time if delta_time>0 else 0.0
+        left_speed = left_speed - (P+self.I+D)
+        right_speed = right_speed + (P+self.I+D)
+        self.last_time = time
+        self.last_error = error
         return left_speed, right_speed
         
         
@@ -269,10 +286,10 @@ class LineFollow(DTROS):
         last_average = 0
         rate = rospy.Rate(20) # 10Hz
         while not rospy.is_shutdown():
-            if self.range > self.distance or self.range<0.05:           
+            if True: #self.range > self.distance or self.range<0.09:           
                 # Put the wheel commands in a message and publish
                 speed.header.stamp = speed.header.stamp
-                l, r = self.error_to_speed(self.error)
+                l, r = self.error_to_speed(self.error,self.last_error,self.time,self.last_time)
                 rospy.loginfo(l)
                 rospy.loginfo(r)
                 speed_l, speed_r = self.speedToCmd(l,r)
