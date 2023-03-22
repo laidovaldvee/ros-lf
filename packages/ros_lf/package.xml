@@ -1,5 +1,5 @@
 <package>
-  <name>ros-lf</name>
+  <name>ros_lf</name>
   <version>0.1.0</version>
   <description>
   This package is a LineFollower array test.
@@ -7,5 +7,5 @@
   <maintainer email="laidovaldvee@gmail.com">Laido Valdvee</maintainer>
   <license>None</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin</buildtool_depend> 
 </package>

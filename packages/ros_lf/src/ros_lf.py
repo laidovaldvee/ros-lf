@@ -8,19 +8,22 @@ import yaml
 import math
 import time
 
+#from ros_lf.msg import LineArray
 from duckietown.dtros import DTROS, NodeType, TopicType, DTParam, ParamType
 from sensor_msgs.msg import Range
 from std_msgs.msg import Float32
 from duckietown_msgs.msg import WheelsCmdStamped, WheelEncoderStamped
+from my_msgs.msg import LineArray
 import odometry_activity as odom
 
-Kp = rospy.set_param("/p",0.2)
+Kp = rospy.set_param("/p",0.267)  #speed 3 Kp 0.225; speed 4 Kp 0.267
 Ki = rospy.set_param("/i",0.0)
 Kd = rospy.set_param("/d",0.0)
+Speed = rospy.set_param("/speed",4.0)
 #Kp = 0.3
 #Ki = 0.0
 #Kd = 0.2
-Speed = 3
+#Speed = 3
 
 
 
@@ -234,6 +237,7 @@ class LineFollow(DTROS):
         Kp = rospy.get_param("/p")
         Ki = rospy.get_param("/i")
         Kd = rospy.get_param("/d")
+        Speed = rospy.get_param("/speed")
         left_speed = Speed
         right_speed = Speed
         #max_speed = 4

@@ -1,5 +1,5 @@
 # parameters
-ARG REPO_NAME="ros-lf"
+ARG REPO_NAME="ros_lf"
 ARG DESCRIPTION="Line following using ROS and Sparkfun line follower array"
 ARG MAINTAINER="Laido Valdvee (laidovaldvee@gmail.com)"
 # pick an icon from: https://fontawesome.com/v4.7.0/icons/

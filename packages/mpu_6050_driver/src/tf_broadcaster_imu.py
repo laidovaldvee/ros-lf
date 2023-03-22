@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
+import os
 import tf_conversions
 import tf2_ros
 import geometry_msgs.msg
@@ -25,6 +26,7 @@ def handle_imu_pose(msg):
     br.sendTransform(t)
 
 if __name__ == '__main__':
+      veh_name = os.environ['VEHICLE_NAME']
       rospy.init_node('tf_broadcaster_imu')
-      rospy.Subscriber('/imu/data', Imu, handle_imu_pose)
+      rospy.Subscriber('/'+veh_name+'/imu/data_raw', Imu, handle_imu_pose)
       rospy.spin()

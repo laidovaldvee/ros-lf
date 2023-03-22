@@ -4,7 +4,7 @@ import os
 import rospy
 import numpy as np
 import math
-
+#from ros_lf.msg import LineArray
 from duckietown.dtros import DTROS, NodeType
 from std_msgs.msg import Float32
 from smbus2 import SMBus
@@ -13,7 +13,7 @@ busno = 12 #/dev/i2c-12
 addr = 62 #0x3e
 reg = 17 #0x11
 
-error_list = [14 , 10 , 6 , 2 , -2 , -6 , -10 , -14]
+error_list = [16 , 12 , 8 , 4 , -4 , -8 , -12 , -16]
 bus = SMBus(busno)
 
 class MyPublisherNode(DTROS):
